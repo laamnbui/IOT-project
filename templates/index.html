@@ -1,0 +1,158 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyResearch - Pothole Detection Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+        }
+        .header {
+            background-color: #0055FF;
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .dashboard-container {
+            max-width: 1280px;
+            margin: 30px auto;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .video-container {
+            flex: 2;
+            min-width: 300px;
+        }
+        .video-feed {
+            width: 100%;
+            border: 3px solid #0055FF;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .stats-panel {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 1px solid #0055FF;
+        }
+        .stats-panel h2 {
+            color: #0055FF;
+            margin: 0 0 15px 0;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #0055FF;
+            padding-bottom: 5px;
+        }
+        .stats-item {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        .stats-item strong {
+            color: #333;
+        }
+        .iot-panel {
+            margin-top: 20px;
+            background-color: #eef5ff;
+            padding: 18px;
+            border-radius: 10px;
+            border: 1px solid #cfe2ff;
+        }
+        .led-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: inset 0 0 0 1px rgba(0,85,255,0.12);
+        }
+        .led-indicator {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: #d3d3d3;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .led-indicator.on {
+            background-color: #34d399;
+            box-shadow: 0 0 12px rgba(52,211,153,0.5);
+        }
+        .iot-description {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #444;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Video Feed -->
+        <div class="video-container">
+            <img src="{{ url_for('video_feed') }}" class="video-feed" alt="Video Feed">
+        </div>
+
+        <!-- IoT LED Simulation Panel -->
+        <div class="stats-panel">
+            <h2>Demo Panel</h2>
+            <div class="stats-item">
+                <strong>Detections:</strong> <span id="detection-count">0</span>
+            </div>
+            <div class="stats-item iot-panel">
+                    <div id="led-indicator" class="led-indicator"></div>
+                    <div>
+                        <strong>LED Status:</strong>
+                        <span id="led-status">OFF</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript to Update Detection Count and LED Status -->
+    <script>
+        async function updateDetectionInfo() {
+            try {
+                const [countResponse, ledResponse] = await Promise.all([
+                    fetch('/detection_count'),
+                    fetch('/led_state')
+                ]);
+
+                const countData = await countResponse.json();
+                const ledData = await ledResponse.json();
+                const ledIndicator = document.getElementById('led-indicator');
+                const ledStatus = document.getElementById('led-status');
+
+                document.getElementById('detection-count').innerText = countData.detections;
+                if (ledData.led_on) {
+                    ledIndicator.classList.add('on');
+                    ledStatus.innerText = 'ON';
+                } else {
+                    ledIndicator.classList.remove('on');
+                    ledStatus.innerText = 'OFF';
+                }
+            } catch (error) {
+                console.error('Error fetching detection info:', error);
+            }
+        }
+
+        setInterval(updateDetectionInfo, 1000);
+        updateDetectionInfo();
+    </script>
+</body>
+</html>
