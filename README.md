@@ -1,61 +1,67 @@
-# Pothole-Computer-Vision-Project
+### Edge AI Pothole Tracker
 
-A simple Flask-based pothole detection demo using a YOLO model and OpenCV video streaming.
+## Part 1: About The Project
 
-## Prerequisites
+This is an IoT project that uses a Raspberry Pi to find and map potholes on the road in real-time. We mount a Raspberry Pi, a camera, and a GPS module on a vehicle. As the vehicle moves, the system watches the road, detects potholes, and saves their locations on a web map.
 
-- Python 3.8 or newer
-- `pip` package manager
-- A working camera or video file named `demo.mp4` in the project root
+# How it works:
 
-## Repository Contents
+Camera: The Pi records video using rpicam-vid for smooth performance.
 
-- `app.py` - Flask application and video processing pipeline
-- `best.pt` - YOLO model checkpoint used for pothole detection
-- `demo.mp4` - example video input for the demo
-- `templates/index.html` - web UI served by Flask
+AI Detection: It takes frames from the video and sends them to a Roboflow API (YOLO model). The AI checks if there is a pothole in the picture.
 
-## Installation
+GPS Tracking: A NEO-6M GPS module runs in the background to get the exact latitude and longitude.
 
-1. Open a terminal in the project folder:
+Data Saving: If a pothole is found, the system saves the image to the local SD card and uploads the GPS data and image link to MongoDB.
 
-```bash
-cd "c:\Users\buing\Downloads\Pothole-Computer-Vision-Project-main\Pothole-Computer-Vision-Project-main"
-```
+Web Map: Users can open a web browser to see the live video stream and a map with red markers showing all the bad road spots.
 
-2. Install required Python packages:
+# Tech Stack
 
-```bash
-pip install flask opencv-python ultralytics supervision pyresearch
-```
+Hardware: Raspberry Pi 4, Pi Camera, Ublox NEO-6M GPS.
 
-> If you already have a virtual environment, activate it first before installing dependencies.
+Backend: Python, Flask.
 
-## Running the Application
+AI & Vision: Roboflow API, OpenCV, Supervision.
 
-1. Ensure `demo.mp4` is present in the project folder.
-2. Start the Flask app:
+Database: MongoDB Atlas.
 
-```bash
-python app.py
-```
+Frontend: HTML, Leaflet.js (for OpenStreetMap).
 
-3. Open your browser and go to:
+## Part 2: How to Run on Terminal (Raspberry Pi)
 
-```text
-http://127.0.0.1:5000/
-```
+Before you start, make sure your hardware is connected correctly and you have your MONGO_URI and ROBOFLOW_API_KEY inside the app_pi.py file.
 
-The app will stream the processed video and display live detection results.
+# Step 1: Connect to your Pi
 
-## Notes
+Open your terminal (or PowerShell on Windows) and SSH into your Raspberry Pi:
 
-- The app reads from `demo.mp4` by default. To use a different file or camera input, edit the `cv2.VideoCapture("demo.mp4")` line in `app.py`.
-- The model file `best.pt` must remain in the project root for the YOLO model to load successfully.
-- The detection count is exposed at `/detection_count` and LED-style status at `/led_state`.
+ssh admin@<your-pi-ip-address>
 
-## Troubleshooting
 
-- If Flask fails to start, confirm the required packages are installed and that Python is on your PATH.
-- If the video does not load, verify that `demo.mp4` exists and is a valid video file.
-- If the model fails to load, confirm `best.pt` is not corrupted and matches the expected YOLO/Ultralytics version.
+# Step 2: Go to the project folder
+
+cd ~/pothole_project
+
+
+# Step 3: Activate the Virtual Environment
+
+You must turn on the Python virtual environment before running the code so it can load OpenCV and Flask.
+
+source venv/bin/activate
+
+# Step 4: Run the System
+
+Start the main Python file:
+
+python3 app_pi.py
+
+
+## Note
+If it runs successfully, you will see text saying the Database and AI are connected. Now, open your web browser and go to http://<your-pi-ip-address>:5001 to see the live feed and map.
+
+# Troubleshooting (Camera Stuck Error)
+Sometimes, if the code crashed before, the camera hardware gets stuck. If you see a StopIteration or HTTP 500 error, kill the hidden camera processes by running this command, then try Step 4 again:
+
+sudo killall rpicam-vid rpicam-hello
+
