@@ -36,7 +36,7 @@ Before you start, make sure your hardware is connected correctly and you have yo
 
 Open your terminal (or PowerShell on Windows) and SSH into your Raspberry Pi:
 
-ssh admin@<your-pi-ip-address>
+ssh username@hostname.local
 
 
 ### Step 2: Go to the project folder
